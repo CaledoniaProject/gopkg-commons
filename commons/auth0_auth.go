@@ -3,6 +3,7 @@ package commons
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -13,6 +14,23 @@ type Auth0Config struct {
 	ClientSecret string `yaml:"clientSecret" json:"clientSecret"`
 	Domain       string `yaml:"domain" json:"domain"`
 	RedirectURL  string `yaml:"redirectUrl" json:"redirectUrl"`
+}
+
+type JWTUserClaims struct {
+	Aud           string    `json:"aud"`
+	Exp           float64   `json:"exp"` // expire time
+	FamilyName    string    `json:"family_name"`
+	GivenName     string    `json:"given_name"`
+	Email         string    `json:"email"`
+	EmailVerified bool      `json:"email_verified"`
+	Iat           float64   `json:"iat"`
+	Iss           string    `json:"iss"` // auth0 domain
+	Name          string    `json:"name"`
+	Nickname      string    `json:"nickname"`
+	Picture       string    `json:"picture"`
+	Sid           string    `json:"sid"`
+	Sub           string    `json:"sub"` // account id，e.g google-oauth|UID
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type Auth0Authenticator struct {
