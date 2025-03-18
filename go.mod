@@ -7,6 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/CaledoniaProject/gopkg-lumberjack v1.0.0
 	github.com/go-sql-driver/mysql v1.7.0
+	github.com/gomodule/redigo v1.9.2
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/image v0.25.0
 	golang.org/x/oauth2 v0.28.0
