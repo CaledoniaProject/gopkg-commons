@@ -54,6 +54,18 @@ func JsonSuccess(w http.ResponseWriter, r *http.Request, data interface{}) {
 	}
 }
 
+func JsonFail(w http.ResponseWriter, r *http.Request, err error) {
+	w.Header().Add("content-type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(&JsonResponse{
+		Code:        JsonStatusInvalid,
+		Message:     err.Error(),
+		ProcessTime: JsonGetProcessTime(r),
+	}); err != nil {
+		logrus.Errorf("json encode: %v", err)
+	}
+}
+
 func JsonSuccessEx(w http.ResponseWriter, r *http.Request, data interface{}, total int64) {
 	w.Header().Add("content-type", "application/json")
 
