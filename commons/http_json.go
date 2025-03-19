@@ -70,7 +70,7 @@ func JsonSuccessEx(w http.ResponseWriter, r *http.Request, data interface{}, tot
 	w.Header().Add("content-type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(&JsonResponse{
-		Code:        0,
+		Code:        JsonStatusSuccess,
 		Message:     "succeed",
 		Data:        data,
 		Total:       total,
