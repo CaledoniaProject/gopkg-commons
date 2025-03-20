@@ -2,6 +2,18 @@ package commons
 
 import "os"
 
+func NormalFileExists(path string) (bool, error) {
+	if info, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
+	} else {
+		return info.Mode().IsRegular(), nil
+	}
+}
+
 func FileSize(filename string) (int64, error) {
 	file, err := os.Open(filename)
 	if err != nil {
