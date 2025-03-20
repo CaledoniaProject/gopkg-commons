@@ -3,7 +3,41 @@ package commons
 import (
 	"io"
 	"os"
+	"path/filepath"
 )
+
+func RemoveFolderContents(dirname string) error {
+	var (
+		batchSize = 4096
+	)
+
+	dirp, err := os.Open(dirname)
+	if err != nil {
+		return err
+	}
+	defer dirp.Close()
+
+	for {
+		files, err := dirp.Readdir(batchSize)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		for _, file := range files {
+			if err := os.RemoveAll(filepath.Join(dirname, file.Name())); err != nil {
+				return err
+			}
+		}
+
+		if len(files) < batchSize {
+			break
+		}
+	}
+
+	return nil
+}
 
 func GetFilesInDirectory(dirPath string, maxRead int) ([]string, error) {
 	var (
