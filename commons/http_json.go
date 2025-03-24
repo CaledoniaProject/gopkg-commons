@@ -32,6 +32,44 @@ type JsonResponse2 struct {
 	Data    *json.RawMessage `json:"data"`
 }
 
+func JsonRequest(options *RequestOptions) (*json.RawMessage, error) {
+	var (
+		jsonResp JsonResponse2
+	)
+
+	if resp, body, err := HttpRequest(options); err != nil {
+		return nil, err
+	} else if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("bad http status %d", resp.StatusCode)
+	} else if err := json.Unmarshal(body, &jsonResp); err != nil {
+		return nil, err
+	} else if jsonResp.Code != 0 {
+		return nil, fmt.Errorf("code=%d, msg=%s", jsonResp.Code, jsonResp.Message)
+	} else {
+		return jsonResp.Data, nil
+	}
+}
+
+func JsonRequestEx(options *RequestOptions, dataStruct any) error {
+	var (
+		jsonResp JsonResponse2
+	)
+
+	if resp, body, err := HttpRequest(options); err != nil {
+		return err
+	} else if resp.StatusCode != 200 {
+		return fmt.Errorf("bad http status %d", resp.StatusCode)
+	} else if err := json.Unmarshal(body, &jsonResp); err != nil {
+		return err
+	} else if jsonResp.Code != 0 {
+		return fmt.Errorf("code=%d, msg=%s", jsonResp.Code, jsonResp.Message)
+	} else if err := json.Unmarshal(*jsonResp.Data, dataStruct); err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
 func JsonGetProcessTime(r *http.Request) string {
 	var (
 		requestTime = r.Context().Value(ContextTypeRequestTimestamp).(time.Time)
