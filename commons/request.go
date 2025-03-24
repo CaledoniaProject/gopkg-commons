@@ -86,6 +86,10 @@ func HttpRequest(options *RequestOptions) (resp *http.Response, body []byte, err
 		client.Jar = options.CookieJar
 	}
 
+	if options.MaxBodyRead == 0 {
+		options.MaxBodyRead = 4096
+	}
+
 	if options.MaxRetry == 0 {
 		options.MaxRetry = 1
 	}
