@@ -106,6 +106,10 @@ func HttpRequest(options *RequestOptions) (resp *http.Response, body []byte, err
 		options.CheckError = DefaultCheckHTTPError
 	}
 
+	if options.Method == "" && options.Body != nil {
+		options.Method = "POST"
+	}
+
 	req, err := http.NewRequest(options.Method, options.URL, options.Body)
 	if err != nil {
 		return
