@@ -32,13 +32,13 @@ func (s *SimpleTokenAuthenticator) Auth(r *http.Request) error {
 	return nil
 }
 
-func SimpleTokenMiddleWare(
-	next func(w http.ResponseWriter, r *http.Request),
-	auth *SimpleTokenAuthenticator,
-	logger *logrus.Logger) http.HandlerFunc {
+func SimpleTokenMiddleWare(next func(w http.ResponseWriter, r *http.Request), auth *SimpleTokenAuthenticator, logger *logrus.Logger) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := auth.Auth(r); err != nil {
-			logger.Errorf("token auth failed: %v", err)
+			if logger != nil {
+				logger.Errorf("token auth failed: %v", err)
+			}
+
 			w.WriteHeader(401)
 		} else {
 			http.HandlerFunc(next).ServeHTTP(w, r)
