@@ -71,12 +71,13 @@ func JsonRequestEx(options *RequestOptions, dataStruct any) error {
 }
 
 func JsonGetProcessTime(r *http.Request) string {
-	var (
-		requestTime = r.Context().Value(ContextTypeRequestTimestamp).(time.Time)
-		processTime = time.Since(requestTime)
-	)
-
-	return processTime.String()
+	if timeCtx := r.Context().Value(ContextTypeRequestTimestamp); timeCtx == nil {
+		return ""
+	} else if timeValue, ok := timeCtx.(time.Time); !ok {
+		return ""
+	} else {
+		return time.Since(timeValue).String()
+	}
 }
 
 func JsonSuccess(w http.ResponseWriter, r *http.Request, data interface{}) {
