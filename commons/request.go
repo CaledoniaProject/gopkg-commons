@@ -168,3 +168,13 @@ func HttpRequest(options *RequestOptions) (resp *http.Response, body []byte, err
 
 	return
 }
+
+func URLDownloadToByets(options *RequestOptions) ([]byte, error) {
+	if resp, body, err := HttpRequest(options); err != nil {
+		return nil, err
+	} else if resp.StatusCode != 200 {
+		return nil, err
+	} else {
+		return body, nil
+	}
+}
