@@ -25,3 +25,13 @@ func (s IntSlice) Value() (driver.Value, error) {
 
 	return string(data), nil
 }
+
+func (s *IntSlice) AppendDedup(value int) {
+	for _, v := range *s {
+		if v == value {
+			return
+		}
+	}
+
+	*s = append(*s, value)
+}
