@@ -1,6 +1,6 @@
 package commons
 
-func IntSliceAppendIntDedup(target []int, value int) []int {
+func IntSliceAppendDedup(target []int, value int) []int {
 	for _, v := range target {
 		if v == value {
 			return target
