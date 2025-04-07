@@ -26,7 +26,7 @@ func (s IntSlice) Value() (driver.Value, error) {
 	return string(data), nil
 }
 
-func (s *IntSlice) AppendDedup(value int) {
+func (s *IntSlice) AddIfMissing(value int) {
 	for _, v := range *s {
 		if v == value {
 			return
