@@ -3,6 +3,7 @@ package commons
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"golang.org/x/oauth2"
@@ -20,6 +21,49 @@ var (
 	OAuthProviderLinkedIn  = "linkedin"
 	OAuthProviderApple     = "apple"
 )
+
+type OAuthUserInfo struct {
+	Id          string
+	Email       string
+	DisplayName string
+	Avatar      string
+}
+
+type GoogleUser struct {
+	Id            string `json:"id"`
+	Email         string `json:"email"`
+	FamilyName    string `json:"family_name"`
+	GivenName     string `json:"given_name"`
+	Name          string `json:"name"`
+	Picture       string `json:"picture"`
+	VerifiedEmail bool   `json:"verified_email"`
+}
+
+func (g *GoogleUser) ToUserInfo() *OAuthUserInfo {
+	return &OAuthUserInfo{
+		Id:          g.Id,
+		Email:       g.Email,
+		DisplayName: g.Name,
+		Avatar:      g.Picture,
+	}
+}
+
+type MicrosoftUser struct {
+	Id                string `json:"id"`
+	Mail              string `json:"mail"`
+	DisplayName       string `json:"displayName"`
+	GivenName         string `json:"givenName"`
+	Surname           string `json:"surname"`
+	UserPrincipalName string `json:"userPrincipalName"`
+}
+
+func (m *MicrosoftUser) ToUserInfo() *OAuthUserInfo {
+	return &OAuthUserInfo{
+		Id:          m.Id,
+		Email:       m.Mail,
+		DisplayName: m.DisplayName,
+	}
+}
 
 type OAuthProviderConfig struct {
 	Scopes      []string
@@ -83,7 +127,7 @@ type OAuthConfigBlock struct {
 	RedirectURL  string `yaml:"redirectUrl" json:"redirectUrl"`
 }
 
-func (o *OAuthConfigBlock) Config() *oauth2.Config {
+func (o *OAuthConfigBlock) GetConfig() *oauth2.Config {
 	providerConfig, exists := providerConfigs[o.Provider]
 	if !exists {
 		return nil
@@ -98,9 +142,9 @@ func (o *OAuthConfigBlock) Config() *oauth2.Config {
 	}
 }
 
-func (o *OAuthConfigBlock) UserInfo(ctx context.Context, provider string, code string) (map[string]interface{}, error) {
+func (o *OAuthConfigBlock) GetUserInfo(ctx context.Context, provider string, code string) (*OAuthUserInfo, error) {
 	var (
-		oauth2Config = o.Config()
+		oauth2Config = o.GetConfig()
 	)
 
 	token, err := oauth2Config.Exchange(ctx, code)
@@ -123,10 +167,24 @@ func (o *OAuthConfigBlock) UserInfo(ctx context.Context, provider string, code s
 	}
 	defer resp.Body.Close()
 
-	var userInfo map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		return nil, fmt.Errorf("failed to decode user info from %s: %v", providerConfig.UserInfoURL, err)
+	// decode data
+	if provider == "google" {
+		googleUser := &GoogleUser{}
+
+		if err := json.NewDecoder(resp.Body).Decode(&googleUser); err != nil {
+			return nil, fmt.Errorf("decode %s user info: %v", provider, err)
+		} else {
+			return googleUser.ToUserInfo(), nil
+		}
+	} else if provider == "microsoft" {
+		microsoftUser := &MicrosoftUser{}
+
+		if err := json.NewDecoder(resp.Body).Decode(&microsoftUser); err != nil {
+			return nil, fmt.Errorf("decode %s user info: %v", provider, err)
+		} else {
+			return microsoftUser.ToUserInfo(), nil
+		}
 	}
 
-	return userInfo, nil
+	return nil, errors.New("unprocessed")
 }
