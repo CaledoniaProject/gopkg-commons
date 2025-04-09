@@ -98,7 +98,16 @@ func (o *OAuthConfigBlock) Config() *oauth2.Config {
 	}
 }
 
-func (o *OAuthConfigBlock) UserInfo(provider string, token *oauth2.Token) (map[string]interface{}, error) {
+func (o *OAuthConfigBlock) UserInfo(ctx context.Context, provider string, code string) (map[string]interface{}, error) {
+	var (
+		oauth2Config = o.Config()
+	)
+
+	token, err := oauth2Config.Exchange(ctx, code)
+	if err != nil {
+		return nil, err
+	}
+
 	providerConfig, exists := providerConfigs[provider]
 	if !exists {
 		return nil, fmt.Errorf("provider %s not found", provider)
@@ -108,8 +117,7 @@ func (o *OAuthConfigBlock) UserInfo(provider string, token *oauth2.Token) (map[s
 		return nil, fmt.Errorf("apple OAuth user info fetching requires JWT handling")
 	}
 
-	client := o.Config().Client(context.Background(), token)
-	resp, err := client.Get(providerConfig.UserInfoURL)
+	resp, err := oauth2Config.Client(ctx, token).Get(providerConfig.UserInfoURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch user info from %s: %v", providerConfig.UserInfoURL, err)
 	}
