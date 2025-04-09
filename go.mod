@@ -10,10 +10,11 @@ require (
 	github.com/gomodule/redigo v1.9.2
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/image v0.25.0
-	golang.org/x/oauth2 v0.28.0
+	golang.org/x/oauth2 v0.29.0
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	github.com/PuerkitoBio/rehttp v1.4.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
