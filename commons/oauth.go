@@ -66,12 +66,13 @@ var providerConfigs = map[string]OAuthProviderConfig{
 	},
 }
 
-func GetOAuthConfig(oauthConfigBlocks []*OAuthConfigBlock, provider string) *oauth2.Config {
+func GetOAuthConfigBlock(oauthConfigBlocks []*OAuthConfigBlock, provider string) *OAuthConfigBlock {
 	for _, oauthConfigBlock := range oauthConfigBlocks {
 		if oauthConfigBlock.Provider == provider {
-			return oauthConfigBlock.Config()
+			return oauthConfigBlock
 		}
 	}
+
 	return nil
 }
 
