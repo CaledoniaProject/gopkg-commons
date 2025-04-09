@@ -1,6 +1,10 @@
 package commons
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
 	"golang.org/x/oauth2/github"
@@ -8,74 +12,112 @@ import (
 	"golang.org/x/oauth2/microsoft"
 )
 
-type OAuthConfig struct {
+var (
+	OAuthProviderMicrosoft = "microsoft"
+	OAuthProviderGoogle    = "google"
+	OAuthProviderGitHub    = "github"
+	OAuthProviderFacebook  = "facebook"
+	OAuthProviderLinkedIn  = "linkedin"
+	OAuthProviderApple     = "apple"
+)
+
+type OAuthProviderConfig struct {
+	Scopes      []string
+	Endpoint    oauth2.Endpoint
+	UserInfoURL string
+}
+
+var providerConfigs = map[string]OAuthProviderConfig{
+	OAuthProviderGoogle: {
+		Scopes:      []string{"openid", "profile", "email"},
+		Endpoint:    google.Endpoint,
+		UserInfoURL: "https://www.googleapis.com/oauth2/v2/userinfo",
+	},
+	OAuthProviderGitHub: {
+		Scopes:      []string{"read:user", "user:email"},
+		Endpoint:    github.Endpoint,
+		UserInfoURL: "https://api.github.com/user",
+	},
+	OAuthProviderFacebook: {
+		Scopes:      []string{"public_profile", "email"},
+		Endpoint:    facebook.Endpoint,
+		UserInfoURL: "https://graph.facebook.com/me?fields=id,name,email",
+	},
+	OAuthProviderMicrosoft: {
+		Scopes:      []string{"User.Read"},
+		Endpoint:    microsoft.AzureADEndpoint("common"),
+		UserInfoURL: "https://graph.microsoft.com/v1.0/me",
+	},
+	OAuthProviderLinkedIn: {
+		Scopes: []string{"r_liteprofile", "r_emailaddress"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://www.linkedin.com/oauth/v2/authorization",
+			TokenURL: "https://www.linkedin.com/oauth/v2/accessToken",
+		},
+		UserInfoURL: "https://api.linkedin.com/v2/me",
+	},
+	OAuthProviderApple: {
+		Scopes: []string{"name", "email"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://appleid.apple.com/auth/authorize",
+			TokenURL: "https://appleid.apple.com/auth/token",
+		},
+		UserInfoURL: "", // Apple OAuth requires JWT handling
+	},
+}
+
+func GetOAuthConfig(oauthConfigBlocks []*OAuthConfigBlock, provider string) *oauth2.Config {
+	for _, oauthConfigBlock := range oauthConfigBlocks {
+		if oauthConfigBlock.Provider == provider {
+			return oauthConfigBlock.Config()
+		}
+	}
+	return nil
+}
+
+type OAuthConfigBlock struct {
+	Provider     string `yaml:"provider" json:"provider"`
 	ClientID     string `yaml:"clientId" json:"clientId"`
 	ClientSecret string `yaml:"clientSecret" json:"clientSecret"`
 	RedirectURL  string `yaml:"redirectUrl" json:"redirectUrl"`
 }
 
-func (o *OAuthConfig) Google() *oauth2.Config {
+func (o *OAuthConfigBlock) Config() *oauth2.Config {
+	providerConfig, exists := providerConfigs[o.Provider]
+	if !exists {
+		return nil
+	}
+
 	return &oauth2.Config{
 		ClientID:     o.ClientID,
 		ClientSecret: o.ClientSecret,
 		RedirectURL:  o.RedirectURL,
-		Scopes:       []string{"openid", "profile", "email"},
-		Endpoint:     google.Endpoint,
+		Scopes:       providerConfig.Scopes,
+		Endpoint:     providerConfig.Endpoint,
 	}
 }
 
-func (o *OAuthConfig) GitHub() *oauth2.Config {
-	return &oauth2.Config{
-		ClientID:     o.ClientID,
-		ClientSecret: o.ClientSecret,
-		RedirectURL:  o.RedirectURL,
-		Scopes:       []string{"read:user", "user:email"},
-		Endpoint:     github.Endpoint,
+func (o *OAuthConfigBlock) UserInfo(provider string, token *oauth2.Token) (map[string]interface{}, error) {
+	providerConfig, exists := providerConfigs[provider]
+	if !exists {
+		return nil, fmt.Errorf("provider %s not found", provider)
 	}
-}
 
-func (o *OAuthConfig) Facebook() *oauth2.Config {
-	return &oauth2.Config{
-		ClientID:     o.ClientID,
-		ClientSecret: o.ClientSecret,
-		RedirectURL:  o.RedirectURL,
-		Scopes:       []string{"public_profile", "email"},
-		Endpoint:     facebook.Endpoint,
+	if provider == OAuthProviderApple {
+		return nil, fmt.Errorf("apple OAuth user info fetching requires JWT handling")
 	}
-}
 
-func (o *OAuthConfig) Microsoft() *oauth2.Config {
-	return &oauth2.Config{
-		ClientID:     o.ClientID,
-		ClientSecret: o.ClientSecret,
-		RedirectURL:  o.RedirectURL,
-		Scopes:       []string{"User.Read"},
-		Endpoint:     microsoft.AzureADEndpoint("common"),
+	client := o.Config().Client(context.Background(), token)
+	resp, err := client.Get(providerConfig.UserInfoURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch user info from %s: %v", providerConfig.UserInfoURL, err)
 	}
-}
+	defer resp.Body.Close()
 
-func (o *OAuthConfig) LinkedIn() *oauth2.Config {
-	return &oauth2.Config{
-		ClientID:     o.ClientID,
-		ClientSecret: o.ClientSecret,
-		RedirectURL:  o.RedirectURL,
-		Scopes:       []string{"r_liteprofile", "r_emailaddress"},
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://www.linkedin.com/oauth/v2/authorization",
-			TokenURL: "https://www.linkedin.com/oauth/v2/accessToken",
-		},
+	var userInfo map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
+		return nil, fmt.Errorf("failed to decode user info from %s: %v", providerConfig.UserInfoURL, err)
 	}
-}
 
-func (o *OAuthConfig) Apple() *oauth2.Config {
-	return &oauth2.Config{
-		ClientID:     o.ClientID,
-		ClientSecret: o.ClientSecret,
-		RedirectURL:  o.RedirectURL,
-		Scopes:       []string{"name", "email"},
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://appleid.apple.com/auth/authorize",
-			TokenURL: "https://appleid.apple.com/auth/token",
-		},
-	}
+	return userInfo, nil
 }
