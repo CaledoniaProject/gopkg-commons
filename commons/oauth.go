@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
@@ -67,6 +66,23 @@ func (m *MicrosoftUser) ToUserInfo() *OAuthUserInfo {
 		Id:          m.Id,
 		Email:       m.Mail,
 		DisplayName: m.DisplayName,
+	}
+}
+
+type LinkedInUser struct {
+	Sub           string `json:"sub"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+}
+
+func (l *LinkedInUser) ToUserInfo() *OAuthUserInfo {
+	return &OAuthUserInfo{
+		Id:          l.Sub,
+		DisplayName: l.Name,
+		Email:       l.Email,
 	}
 }
 
@@ -202,8 +218,13 @@ func (o *OAuthConfigBlock) GetUserInfo(ctx context.Context, provider string, cod
 			return microsoftUser.ToUserInfo(), nil
 		}
 	} else if provider == "linkedin" {
-		data, _ := io.ReadAll(resp.Body)
-		fmt.Println(string(data))
+		linkedinUser := &LinkedInUser{}
+
+		if err := json.NewDecoder(resp.Body).Decode(&linkedinUser); err != nil {
+			return nil, fmt.Errorf("decode %s user info: %v", provider, err)
+		} else {
+			return linkedinUser.ToUserInfo(), nil
+		}
 	}
 
 	return nil, errors.New("unprocessed provider, fix the code")
