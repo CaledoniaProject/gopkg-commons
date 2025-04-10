@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
@@ -200,7 +201,10 @@ func (o *OAuthConfigBlock) GetUserInfo(ctx context.Context, provider string, cod
 		} else {
 			return microsoftUser.ToUserInfo(), nil
 		}
+	} else if provider == "linkedin" {
+		data, _ := io.ReadAll(resp.Body)
+		fmt.Println(string(data))
 	}
 
-	return nil, errors.New("unprocessed")
+	return nil, errors.New("unprocessed provider, fix the code")
 }
