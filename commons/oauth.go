@@ -110,7 +110,7 @@ var providerConfigs = map[string]OAuthProviderConfig{
 		UserInfoURL: "https://graph.microsoft.com/v1.0/me",
 	},
 	OAuthProviderLinkedIn: {
-		Scopes: []string{"email", "openid", "profile"},
+		Scopes: []string{"r_liteprofile", "r_emailaddress"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://www.linkedin.com/oauth/v2/authorization",
 			TokenURL: "https://www.linkedin.com/oauth/v2/accessToken",
