@@ -55,6 +55,10 @@ type MicrosoftUser struct {
 	GivenName         string `json:"givenName"`
 	Surname           string `json:"surname"`
 	UserPrincipalName string `json:"userPrincipalName"`
+	PreferredLanguage string `json:"preferredLanguage"`
+	JobTitle          any    `json:"jobTitle"`
+	OfficeLocation    any    `json:"officeLocation"`
+	MobilePhone       any    `json:"mobilePhone"`
 }
 
 func (m *MicrosoftUser) ToUserInfo() *OAuthUserInfo {
@@ -62,6 +66,18 @@ func (m *MicrosoftUser) ToUserInfo() *OAuthUserInfo {
 		Id:          m.Id,
 		Email:       m.Mail,
 		DisplayName: m.DisplayName,
+	}
+}
+
+type FacebookUser struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func (f *FacebookUser) ToUserInfo() *OAuthUserInfo {
+	return &OAuthUserInfo{
+		Id:          f.Id,
+		DisplayName: f.Name,
 	}
 }
 
@@ -93,7 +109,7 @@ var providerConfigs = map[string]OAuthProviderConfig{
 		UserInfoURL: "https://graph.microsoft.com/v1.0/me",
 	},
 	OAuthProviderLinkedIn: {
-		Scopes: []string{"r_liteprofile", "r_emailaddress"},
+		Scopes: []string{"email", "openid", "profile"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://www.linkedin.com/oauth/v2/authorization",
 			TokenURL: "https://www.linkedin.com/oauth/v2/accessToken",
