@@ -76,6 +76,7 @@ type LinkedInUser struct {
 	FamilyName    string `json:"family_name"`
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"email_verified"`
+	Picture       string `json:"picture"`
 }
 
 func (l *LinkedInUser) ToUserInfo() *OAuthUserInfo {
@@ -83,6 +84,7 @@ func (l *LinkedInUser) ToUserInfo() *OAuthUserInfo {
 		Id:          l.Sub,
 		DisplayName: l.Name,
 		Email:       l.Email,
+		Avatar:      l.Picture,
 	}
 }
 
