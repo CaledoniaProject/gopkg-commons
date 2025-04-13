@@ -3,6 +3,7 @@ package commons
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 var (
@@ -41,6 +42,10 @@ func RandomUserAgent() string {
 }
 
 func RandomStringSlice(input []string) string {
-	index := rand.Intn(len(input))
+	var (
+		rnd   = rand.New(rand.NewSource(time.Now().UnixNano()))
+		index = rnd.Intn(len(input))
+	)
+
 	return input[index]
 }
