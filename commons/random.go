@@ -49,3 +49,12 @@ func RandomStringSlice(input []string) string {
 
 	return input[index]
 }
+
+func RandomStringSliceWithIndex(input []string) (string, int) {
+	var (
+		rnd   = rand.New(rand.NewSource(time.Now().UnixNano()))
+		index = rnd.Intn(len(input))
+	)
+
+	return input[index], index
+}
