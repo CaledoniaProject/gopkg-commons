@@ -69,14 +69,20 @@ func (m *MicrosoftUser) ToUserInfo() *OAuthUserInfo {
 	}
 }
 
+type LinkedInLocale struct {
+	Country  string `json:"country"`
+	Language string `json:"language"`
+}
+
 type LinkedInUser struct {
-	Sub           string `json:"sub"`
-	Name          string `json:"name"`
-	GivenName     string `json:"given_name"`
-	FamilyName    string `json:"family_name"`
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-	Picture       string `json:"picture"`
+	Sub           string         `json:"sub"`
+	Name          string         `json:"name"`
+	GivenName     string         `json:"given_name"`
+	FamilyName    string         `json:"family_name"`
+	Email         string         `json:"email"`
+	EmailVerified bool           `json:"email_verified"`
+	Locale        LinkedInLocale `json:"locale"`
+	Picture       string         `json:"picture"`
 }
 
 func (l *LinkedInUser) ToUserInfo() *OAuthUserInfo {
