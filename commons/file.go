@@ -2,6 +2,14 @@ package commons
 
 import "os"
 
+func ReadFileToString(filename string) (string, error) {
+	if data, err := os.ReadFile(filename); err != nil {
+		return "", err
+	} else {
+		return string(data), nil
+	}
+}
+
 func NormalFileExists(path string) (bool, error) {
 	if info, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
