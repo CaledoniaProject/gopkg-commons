@@ -45,6 +45,7 @@ type SitemapConfig struct {
 type StandardConfig struct {
 	Environ            string                    `yaml:"environ"`
 	Mode               string                    `yaml:"mode"`
+	Proxy              string                    `yaml:"proxy"`
 	Listen             string                    `yaml:"listen"`
 	LogLevel           string                    `yaml:"logLevel"`
 	LogDir             string                    `yaml:"logDir"`
@@ -70,6 +71,13 @@ func (s *StandardConfig) StandardInit() error {
 			return errors.Wrapf(err, "expand homedir")
 		} else {
 			s.LogDir = tmp
+		}
+	}
+
+	// proxy
+	if s.Proxy != "" {
+		if err := SetGlobalHTTPProxy(s.Proxy); err != nil {
+			return errors.Wrapf(err, "set global proxy")
 		}
 	}
 
