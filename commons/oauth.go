@@ -209,7 +209,8 @@ func (o *OAuthConfigBlock) GetUserInfo(ctx context.Context, provider string, cod
 	defer resp.Body.Close()
 
 	// decode data
-	if provider == "google" {
+	switch provider {
+	case "google":
 		googleUser := &GoogleUser{}
 
 		if err := json.NewDecoder(resp.Body).Decode(&googleUser); err != nil {
@@ -217,7 +218,7 @@ func (o *OAuthConfigBlock) GetUserInfo(ctx context.Context, provider string, cod
 		} else {
 			return googleUser.ToUserInfo(), nil
 		}
-	} else if provider == "microsoft" {
+	case "microsoft":
 		microsoftUser := &MicrosoftUser{}
 
 		if err := json.NewDecoder(resp.Body).Decode(&microsoftUser); err != nil {
@@ -225,7 +226,7 @@ func (o *OAuthConfigBlock) GetUserInfo(ctx context.Context, provider string, cod
 		} else {
 			return microsoftUser.ToUserInfo(), nil
 		}
-	} else if provider == "linkedin" {
+	case "linkedin":
 		linkedinUser := &LinkedInUser{}
 
 		if err := json.NewDecoder(resp.Body).Decode(&linkedinUser); err != nil {

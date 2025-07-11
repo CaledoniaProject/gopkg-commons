@@ -11,7 +11,7 @@ import (
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "text/html")
-	http.Error(w, "No content", http.StatusOK)
+	http.Error(w, "It works!", http.StatusOK)
 }
 
 func GetPostBody(w http.ResponseWriter, r *http.Request) ([]byte, error) {
