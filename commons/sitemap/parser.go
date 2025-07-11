@@ -11,7 +11,7 @@ import (
 )
 
 type SitemapParser struct {
-	OnURLFound func(url SitemapURL)
+	OnURLFound func(url *SitemapURL)
 }
 
 func (p *SitemapParser) LoadURL(sitemapURL string) error {
@@ -63,11 +63,12 @@ func (p *SitemapParser) parseXML(r io.Reader) error {
 			}
 			return err
 		}
+
 		switch se := tok.(type) {
 		case xml.StartElement:
 			switch se.Name.Local {
 			case "url":
-				var url SitemapURL
+				url := &SitemapURL{}
 				if err := decoder.DecodeElement(&url, &se); err == nil && p.OnURLFound != nil {
 					p.OnURLFound(url)
 				}
