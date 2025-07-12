@@ -130,7 +130,7 @@ func (s *StandardConfig) StandardInit() error {
 	return nil
 }
 
-func NewAppConfig(filename string, config any, migrateItems []any) error {
+func NewAppConfig(filename string, config any) error {
 	if data, err := os.ReadFile(filename); err != nil {
 		return err
 	} else if err := yaml.Unmarshal(data, config); err != nil {

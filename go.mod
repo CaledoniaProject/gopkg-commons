@@ -8,6 +8,7 @@ require (
 	github.com/CaledoniaProject/gopkg-lumberjack v1.0.0
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/gomodule/redigo v1.9.2
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/image v0.25.0
 	golang.org/x/oauth2 v0.29.0
@@ -20,7 +21,6 @@ require (
 	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
@@ -35,7 +35,6 @@ require (
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/pkg/errors v0.9.1
 	golang.org/x/sys v0.31.0 // indirect
-	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
