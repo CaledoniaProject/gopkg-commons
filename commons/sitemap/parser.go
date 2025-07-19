@@ -11,7 +11,9 @@ import (
 )
 
 type SitemapParser struct {
-	OnURLFound func(url *SitemapURL)
+	AcceptSitemap func(url *SitemapLoc) bool
+	OnURLFound    func(url *SitemapURL)
+	OnParseError  func(error)
 }
 
 func (p *SitemapParser) LoadURL(sitemapURL string) error {
@@ -71,14 +73,25 @@ func (p *SitemapParser) parseXML(r io.Reader) error {
 			switch se.Name.Local {
 			case "url":
 				url := &SitemapURL{}
-				if err := decoder.DecodeElement(&url, &se); err == nil && p.OnURLFound != nil {
-					url.Loc = strings.TrimSpace(url.Loc)
-					p.OnURLFound(url)
+				if err := decoder.DecodeElement(&url, &se); err == nil {
+					if p.OnURLFound != nil {
+						url.Loc = strings.TrimSpace(url.Loc)
+						p.OnURLFound(url)
+					}
+				} else {
+					p.OnParseError(err)
 				}
 			case "sitemap":
 				var loc SitemapLoc
+
 				if err := decoder.DecodeElement(&loc, &se); err == nil {
+					if p.AcceptSitemap != nil && !p.AcceptSitemap(&loc) {
+						continue
+					}
+
 					_ = p.LoadURL(loc.Loc)
+				} else {
+					p.OnParseError(err)
 				}
 			}
 		}

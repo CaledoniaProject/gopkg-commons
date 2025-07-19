@@ -3,6 +3,8 @@ package sitemap
 import (
 	"encoding/xml"
 	"time"
+
+	"github.com/CaledoniaProject/gopkg-commons/commons"
 )
 
 const (
@@ -29,12 +31,12 @@ type SitemapImage struct {
 }
 
 type SitemapURL struct {
-	XMLName    xml.Name        `xml:"url"`
-	Loc        string          `xml:"loc"`
-	LastMod    time.Time       `xml:"lastmod"`
-	ChangeFreq ChangeFreq      `xml:"changefreq"`
-	Priority   float64         `xml:"priority"`
-	Images     []*SitemapImage `xml:"image:image"`
+	XMLName    xml.Name             `xml:"url"`
+	Loc        string               `xml:"loc"`
+	LastMod    commons.NullableTime `xml:"lastmod"`
+	ChangeFreq ChangeFreq           `xml:"changefreq"`
+	Priority   float64              `xml:"priority"`
+	Images     []*SitemapImage      `xml:"image:image"`
 }
 
 type SitemapLoc struct {

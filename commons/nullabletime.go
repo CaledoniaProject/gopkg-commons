@@ -3,6 +3,7 @@ package commons
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"strings"
 	"time"
@@ -10,7 +11,26 @@ import (
 
 type NullableTime time.Time
 
-func (m *NullableTime) UnmarshalJSON(data []byte) error {
+func (nt *NullableTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var s string
+	if err := d.DecodeElement(&s, &start); err != nil || s == "" {
+		return err
+	}
+	for _, layout := range []string{
+		"2006-01-02",
+		"2006-01-02T15:04:05Z07:00",
+		"2006-01-02T15:04:05Z",
+	} {
+		if t, err := time.Parse(layout, s); err == nil {
+			*nt = NullableTime(t)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("invalid time format: %s", s)
+}
+
+func (nt *NullableTime) UnmarshalJSON(data []byte) error {
 	stringVal := string(data)
 	if stringVal == `""` || stringVal == "null" {
 		return nil
@@ -18,11 +38,11 @@ func (m *NullableTime) UnmarshalJSON(data []byte) error {
 		stringVal = strings.TrimSuffix(stringVal, `"`) + `Z"`
 	}
 
-	return json.Unmarshal([]byte(stringVal), (*time.Time)(m))
+	return json.Unmarshal([]byte(stringVal), (*time.Time)(nt))
 }
 
-func (m *NullableTime) IsZero() bool {
-	return time.Time(*m).IsZero()
+func (nt *NullableTime) IsZero() bool {
+	return time.Time(*nt).IsZero()
 }
 
 // gorm
@@ -32,6 +52,7 @@ func (m NullableTime) Value() (driver.Value, error) {
 	if t.IsZero() {
 		return nil, nil
 	}
+
 	return t, nil
 }
 
