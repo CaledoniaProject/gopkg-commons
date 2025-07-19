@@ -70,6 +70,7 @@ func (p *SitemapParser) parseXML(r io.Reader) error {
 			case "url":
 				url := &SitemapURL{}
 				if err := decoder.DecodeElement(&url, &se); err == nil && p.OnURLFound != nil {
+					url.Loc = strings.TrimSpace(url.Loc)
 					p.OnURLFound(url)
 				}
 			case "sitemap":
