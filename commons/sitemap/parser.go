@@ -19,6 +19,7 @@ func (p *SitemapParser) LoadURL(sitemapURL string) error {
 		URL:         sitemapURL,
 		ReadBody:    true,
 		MaxBodyRead: 10 * 1024 * 1024, // 10MB
+		MaxRedirect: 5,
 	}); err != nil {
 		return errors.Wrapf(err, "load sitemap")
 	} else {
@@ -31,6 +32,7 @@ func (p *SitemapParser) LoadRobots(robotsURL string) error {
 		URL:         robotsURL,
 		ReadBody:    true,
 		MaxBodyRead: 1024 * 1024, // 1MB
+		MaxRedirect: 5,
 	})
 	if err != nil {
 		return errors.Wrapf(err, "load robots")
