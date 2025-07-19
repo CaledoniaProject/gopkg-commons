@@ -2,6 +2,20 @@ package commons
 
 import "strings"
 
+func RemoveEmptyLines(s string) string {
+	var (
+		cleaned []string
+	)
+
+	for _, line := range strings.Split(s, "\n") {
+		if strings.TrimSpace(line) != "" {
+			cleaned = append(cleaned, line)
+		}
+	}
+
+	return strings.Join(cleaned, "\n")
+}
+
 func UpperCaseFirstChar(s string) string {
 	if len(s) == 0 {
 		return s
