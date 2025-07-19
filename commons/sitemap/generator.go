@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/CaledoniaProject/gopkg-commons/commons"
 )
 
 type SitemapGenerator struct {
@@ -93,7 +95,7 @@ func (s *SitemapGenerator) WriteIndex(baseURL string) (string, error) {
 	for _, file := range s.files {
 		if data, err := xml.Marshal(&SitemapLoc{
 			Loc:     baseURL + "/" + file,
-			LastMod: time.Now(),
+			LastMod: commons.NullableTime(time.Now()),
 		}); err != nil {
 			return "", err
 		} else if _, err := filp.Write(data); err != nil {

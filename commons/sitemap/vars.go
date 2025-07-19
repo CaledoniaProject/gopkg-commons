@@ -2,7 +2,6 @@ package sitemap
 
 import (
 	"encoding/xml"
-	"time"
 
 	"github.com/CaledoniaProject/gopkg-commons/commons"
 )
@@ -40,7 +39,7 @@ type SitemapURL struct {
 }
 
 type SitemapLoc struct {
-	XMLName xml.Name  `xml:"sitemap"`
-	Loc     string    `xml:"loc"`
-	LastMod time.Time `xml:"lastmod"`
+	XMLName xml.Name             `xml:"sitemap"`
+	Loc     string               `xml:"loc"`
+	LastMod commons.NullableTime `xml:"lastmod"`
 }

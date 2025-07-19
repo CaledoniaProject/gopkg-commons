@@ -22,6 +22,10 @@ func (p *SitemapParser) LoadURL(sitemapURL string) error {
 		ReadBody:    true,
 		MaxBodyRead: 10 * 1024 * 1024, // 10MB
 		MaxRedirect: 5,
+		Headers: map[string]string{
+			"User-Agent":      commons.RandomUserAgent(),
+			"Accept-Language": "*",
+		},
 	}); err != nil {
 		return errors.Wrapf(err, "load sitemap")
 	} else {
@@ -35,6 +39,10 @@ func (p *SitemapParser) LoadRobots(robotsURL string) error {
 		ReadBody:    true,
 		MaxBodyRead: 1024 * 1024, // 1MB
 		MaxRedirect: 5,
+		Headers: map[string]string{
+			"User-Agent":      commons.RandomUserAgent(),
+			"Accept-Language": "*",
+		},
 	})
 	if err != nil {
 		return errors.Wrapf(err, "load robots")
@@ -89,8 +97,10 @@ func (p *SitemapParser) parseXML(r io.Reader) error {
 						continue
 					}
 
-					_ = p.LoadURL(loc.Loc)
-				} else {
+					if err := p.LoadURL(loc.Loc); err != nil && p.OnParseError != nil {
+						p.OnParseError(err)
+					}
+				} else if p.OnParseError != nil {
 					p.OnParseError(err)
 				}
 			}

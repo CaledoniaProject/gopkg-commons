@@ -11,6 +11,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/image v0.25.0
+	golang.org/x/net v0.37.0
 	golang.org/x/oauth2 v0.29.0
 )
 
@@ -22,7 +23,6 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 )
 
