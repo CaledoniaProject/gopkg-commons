@@ -20,6 +20,7 @@ func (nt *NullableTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 		"2006-01-02",
 		"2006-01-02T15:04:05Z07:00",
 		"2006-01-02T15:04:05Z",
+		"Mon, 02 Jan 2006 15:04:05 -0700",
 	} {
 		if t, err := time.Parse(layout, s); err == nil {
 			*nt = NullableTime(t)
@@ -28,6 +29,14 @@ func (nt *NullableTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 	}
 
 	return fmt.Errorf("invalid time format: %s", s)
+}
+
+func (nt NullableTime) MarshalJSON() ([]byte, error) {
+	if nt.IsZero() {
+		return []byte(`null`), nil
+	}
+
+	return json.Marshal(time.Time(nt).Format(time.RFC3339))
 }
 
 func (nt *NullableTime) UnmarshalJSON(data []byte) error {

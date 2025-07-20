@@ -22,6 +22,7 @@ func (p *SitemapParser) LoadURL(sitemapURL string) error {
 		ReadBody:    true,
 		MaxBodyRead: 10 * 1024 * 1024, // 10MB
 		MaxRedirect: 5,
+		MaxRetry:    3,
 		Headers: map[string]string{
 			"User-Agent":      commons.RandomUserAgent(),
 			"Accept-Language": "*",
@@ -39,6 +40,7 @@ func (p *SitemapParser) LoadRobots(robotsURL string) error {
 		ReadBody:    true,
 		MaxBodyRead: 1024 * 1024, // 1MB
 		MaxRedirect: 5,
+		MaxRetry:    3,
 		Headers: map[string]string{
 			"User-Agent":      commons.RandomUserAgent(),
 			"Accept-Language": "*",
