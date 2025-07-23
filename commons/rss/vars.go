@@ -8,12 +8,13 @@ import (
 )
 
 type RSSItem struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	Content     string `xml:"http://purl.org/rss/1.0/modules/content/ encoded"`
-	PubDate     string `xml:"pubDate"`
-	GUID        string `xml:"guid"`
+	Title       string               `xml:"title"`
+	Link        string               `xml:"link"`
+	Description string               `xml:"description"`
+	Content     string               `xml:"http://purl.org/rss/1.0/modules/content/ encoded"`
+	PubDate     commons.NullableTime `xml:"pubDate"`
+	GUID        string               `xml:"guid"`
+	Image       *RSSImage            `xml:"-"`
 }
 
 func (i *RSSItem) Cleanup() {
@@ -21,7 +22,6 @@ func (i *RSSItem) Cleanup() {
 	i.Link = strings.TrimSpace(i.Link)
 	i.Description = strings.TrimSpace(i.Description)
 	i.Content = strings.TrimSpace(i.Content)
-	i.PubDate = strings.TrimSpace(i.PubDate)
 	i.GUID = strings.TrimSpace(i.GUID)
 }
 

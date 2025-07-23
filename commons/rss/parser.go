@@ -33,6 +33,7 @@ func (r *RSSParser) parseRSS(data []byte) error {
 	}
 
 	for _, item := range feed.Channel.Items {
+		item.Image = feed.Channel.Image
 		item.Cleanup()
 
 		if r.OnURLFound != nil {
