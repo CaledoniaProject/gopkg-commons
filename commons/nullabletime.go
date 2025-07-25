@@ -22,6 +22,7 @@ func (nt *NullableTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 		"2006-01-02T15:04:05Z",
 		"2006-01-02T15:04Z",
 		"Mon, 02 Jan 2006 15:04:05 -0700",
+		"Mon, 02 Jan 2006 15:04:05 MST",
 		"January 2, 2006",
 	} {
 		if t, err := time.Parse(layout, s); err == nil {
