@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
@@ -27,7 +28,25 @@ type OAuthUserInfo struct {
 	Id          string
 	Email       string
 	DisplayName string
+	UserName    string
 	Avatar      string
+}
+
+type GithubUser struct {
+	Id        int       `json:"id"`
+	AvatarURL string    `json:"avatar_url"`
+	Login     string    `json:"login"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (g *GithubUser) ToUserInfo() *OAuthUserInfo {
+	return &OAuthUserInfo{
+		Id:       fmt.Sprintf("%d", g.Id),
+		UserName: g.Login,
+		Provider: OAuthProviderGitHub,
+		Avatar:   g.AvatarURL,
+	}
 }
 
 type GoogleUser struct {
@@ -124,6 +143,7 @@ var providerConfigs = map[string]OAuthProviderConfig{
 		UserInfoURL: "https://www.googleapis.com/oauth2/v2/userinfo",
 	},
 	OAuthProviderGitHub: {
+		// 如果开启 Keep my email addresses private 则无法获取邮箱
 		Scopes:      []string{"read:user", "user:email"},
 		Endpoint:    github.Endpoint,
 		UserInfoURL: "https://api.github.com/user",
@@ -238,6 +258,14 @@ func (o *OAuthConfigBlock) GetUserInfo(ctx context.Context, provider string, cod
 			return nil, fmt.Errorf("decode %s user info: %v", provider, err)
 		} else {
 			return linkedinUser.ToUserInfo(), nil
+		}
+	case "github":
+		githubUser := &GithubUser{}
+
+		if err := json.NewDecoder(resp.Body).Decode(&githubUser); err != nil {
+			return nil, fmt.Errorf("decode %s user info: %v", provider, err)
+		} else {
+			return githubUser.ToUserInfo(), nil
 		}
 	}
 

@@ -67,9 +67,10 @@ func OAuthCallbackHandler(w http.ResponseWriter, r *http.Request, standardConfig
 		http.Error(w, "Internal error. Please try again later.", http.StatusBadRequest)
 		return
 	} else if oauthUser.Email == "" {
-		contextLogger.Errorf("empty email: %v", oauthUser)
-		http.Error(w, "Internal error. Please try again later.", http.StatusBadRequest)
-		return
+		// github可能邮箱为空
+		// contextLogger.Errorf("empty email: %v", oauthUser)
+		// http.Error(w, "Internal error. Please try again later.", http.StatusBadRequest)
+		// return
 	}
 
 	// 处理用户登录
@@ -84,9 +85,15 @@ func OAuthCallbackHandler(w http.ResponseWriter, r *http.Request, standardConfig
 			return
 		}
 
-		// 查询用户信息: 根据邮箱
-		if tx := standardConfig.SqlDB.Model(userInfo).Where("Email = ?", oauthUser.Email).First(userInfo); tx.Error != nil {
-			contextLogger.Errorf("find user: %v", tx.Error)
+		if resetter, ok := userInfo.(commons.PrimaryKeyResetter); ok {
+			resetter.ResetPrimaryKey()
+		}
+
+		// 查询用户信息: 有的接口不提供邮箱，所以根据ID；防止ID已经存在，所以用另外一个空的model
+		if tx := standardConfig.SqlDB.Model(userInfo).
+			Where("Provider = ? AND ExternalId = ?", oauthUser.Provider, oauthUser.Id).
+			Take(userInfo); tx.Error != nil {
+			contextLogger.Errorf("find user by %s and %s: %v", oauthUser.Provider, oauthUser.Id, tx.Error)
 			http.Error(w, "Internal error. Please try again later.", http.StatusBadRequest)
 			return
 		}

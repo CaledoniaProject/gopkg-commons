@@ -7,6 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type PrimaryKeyResetter interface {
+	ResetPrimaryKey()
+}
+
 type TableBase struct {
 	ID        string    `gorm:"type:char(36);primary_key;" json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
@@ -19,4 +23,8 @@ func (b *TableBase) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 
 	return nil
+}
+
+func (b *TableBase) ResetPrimaryKey() {
+	b.ID = ""
 }
