@@ -32,6 +32,7 @@ require (
 	github.com/auth0/go-auth0 v1.18.0
 	github.com/coreos/go-oidc/v3 v3.13.0
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/mux v1.8.1
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/pkg/errors v0.9.1
 	golang.org/x/sys v0.31.0 // indirect

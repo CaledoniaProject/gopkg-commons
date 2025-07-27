@@ -23,6 +23,7 @@ var (
 )
 
 type OAuthUserInfo struct {
+	Provider    string
 	Id          string
 	Email       string
 	DisplayName string
@@ -41,6 +42,7 @@ type GoogleUser struct {
 
 func (g *GoogleUser) ToUserInfo() *OAuthUserInfo {
 	return &OAuthUserInfo{
+		Provider:    OAuthProviderGoogle,
 		Id:          g.Id,
 		Email:       g.Email,
 		DisplayName: g.Name,
@@ -63,6 +65,7 @@ type MicrosoftUser struct {
 
 func (m *MicrosoftUser) ToUserInfo() *OAuthUserInfo {
 	return &OAuthUserInfo{
+		Provider:    OAuthProviderMicrosoft,
 		Id:          m.Id,
 		Email:       m.Mail,
 		DisplayName: m.DisplayName,
@@ -87,6 +90,7 @@ type LinkedInUser struct {
 
 func (l *LinkedInUser) ToUserInfo() *OAuthUserInfo {
 	return &OAuthUserInfo{
+		Provider:    OAuthProviderLinkedIn,
 		Id:          l.Sub,
 		DisplayName: l.Name,
 		Email:       l.Email,
@@ -101,6 +105,7 @@ type FacebookUser struct {
 
 func (f *FacebookUser) ToUserInfo() *OAuthUserInfo {
 	return &OAuthUserInfo{
+		Provider:    OAuthProviderFacebook,
 		Id:          f.Id,
 		DisplayName: f.Name,
 	}
