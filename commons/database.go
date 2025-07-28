@@ -15,7 +15,7 @@ import (
 
 type DatabaseConfig struct {
 	LogDir    string `yaml:"logDir"`
-	GormDebug bool   `yaml:"debug"`
+	GormDebug bool   `yaml:"gormDebug"`
 	DSN       string `yaml:"dsn"`
 }
 

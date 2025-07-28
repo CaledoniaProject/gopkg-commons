@@ -35,18 +35,26 @@ type OAuthUserInfo struct {
 type GithubUser struct {
 	Id        int       `json:"id"`
 	AvatarURL string    `json:"avatar_url"`
+	Name      string    `json:"name"`
 	Login     string    `json:"login"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 func (g *GithubUser) ToUserInfo() *OAuthUserInfo {
-	return &OAuthUserInfo{
-		Id:       fmt.Sprintf("%d", g.Id),
-		UserName: g.Login,
-		Provider: OAuthProviderGitHub,
-		Avatar:   g.AvatarURL,
+	info := &OAuthUserInfo{
+		Id:          fmt.Sprintf("%d", g.Id),
+		UserName:    g.Login,
+		DisplayName: g.Name,
+		Provider:    OAuthProviderGitHub,
+		Avatar:      g.AvatarURL,
 	}
+
+	if info.DisplayName == "" {
+		info.DisplayName = info.UserName
+	}
+
+	return info
 }
 
 type GoogleUser struct {
