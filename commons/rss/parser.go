@@ -14,6 +14,7 @@ type RSSParser struct {
 func (r *RSSParser) Load(feedURL string) error {
 	if _, body, err := commons.HttpRequest(&commons.RequestOptions{
 		URL:         feedURL,
+		Timeout:     120,
 		ReadBody:    true,
 		MaxBodyRead: 10 * 1024 * 1024, // 1MB
 	}); err != nil {
