@@ -19,6 +19,7 @@ type SitemapParser struct {
 func (p *SitemapParser) LoadURL(sitemapURL string) error {
 	if _, body, err := commons.HttpRequest(&commons.RequestOptions{
 		URL:         sitemapURL,
+		Timeout:     120,
 		ReadBody:    true,
 		MaxBodyRead: 10 * 1024 * 1024, // 10MB
 		MaxRedirect: 5,
@@ -37,6 +38,7 @@ func (p *SitemapParser) LoadURL(sitemapURL string) error {
 func (p *SitemapParser) LoadRobots(robotsURL string) error {
 	_, body, err := commons.HttpRequest(&commons.RequestOptions{
 		URL:         robotsURL,
+		Timeout:     120,
 		ReadBody:    true,
 		MaxBodyRead: 1024 * 1024, // 1MB
 		MaxRedirect: 5,

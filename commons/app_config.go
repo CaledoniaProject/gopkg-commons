@@ -1,9 +1,12 @@
 package commons
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/alexedwards/scs/redisstore"
@@ -42,26 +45,82 @@ type SitemapConfig struct {
 	Interval       int    `yaml:"interval"`
 }
 
+type EmailTemplate struct {
+	Template *template.Template
+}
+
+type EmailTemplates map[string]*EmailTemplate
+
+func (e EmailTemplates) Execute(templateName string, data any) (string, error) {
+	var (
+		buffer bytes.Buffer
+	)
+
+	emailTemplate, ok := e[templateName]
+	if !ok {
+		return "", fmt.Errorf("missing template %s", templateName)
+	}
+
+	if err := emailTemplate.Template.Execute(&buffer, data); err != nil {
+		return "", err
+	}
+
+	return buffer.String(), nil
+}
+
+func NewEmailTemplates(folder string) (EmailTemplates, error) {
+	var (
+		results = make(EmailTemplates)
+	)
+
+	if files, err := os.ReadDir(folder); err != nil {
+		return nil, err
+	} else {
+		for _, filp := range files {
+			if filp.IsDir() {
+				continue
+			}
+
+			filename := filepath.Join(folder, filp.Name())
+			if tmpl, err := template.ParseFiles(filename); err != nil {
+				return nil, errors.Wrapf(err, "parse %s as template", filename)
+			} else {
+				results[filp.Name()] = &EmailTemplate{Template: tmpl}
+			}
+		}
+	}
+
+	return results, nil
+}
+
 type StandardConfig struct {
-	Environ            string                    `yaml:"environ"`
-	Mode               string                    `yaml:"mode"`
-	Proxy              string                    `yaml:"proxy"`
-	Listen             string                    `yaml:"listen"`
-	LogLevel           string                    `yaml:"logLevel"`
-	LogDir             string                    `yaml:"logDir"`
-	CookieDomain       string                    `yaml:"cookieDomain"`
-	ClientTokens       []string                  `yaml:"clientTokens"`
-	MySQLConfig        *DatabaseConfig           `yaml:"mysql"`
-	RedisConfig        *RedisConfig              `yaml:"redis"`
-	MinioConfig        *MinioConfig              `yaml:"minio"`
-	Sitemap            *SitemapConfig            `yaml:"sitemap"`
-	OAuthConfigList    []*OAuthConfigBlock       `yaml:"oauth"`
-	SqlDB              *gorm.DB                  ``
-	RedisPool          *redis.Pool               ``
-	MinioClient        *minio.Client             ``
-	RequestLogger      *logrus.Logger            ``
-	TokenAuthenticator *SimpleTokenAuthenticator ``
-	SessionManager     *scs.SessionManager       ``
+	Name                 string                    `yaml:"name"`
+	Environ              string                    `yaml:"environ"`
+	Mode                 string                    `yaml:"mode"`
+	Proxy                string                    `yaml:"proxy"`
+	Listen               string                    `yaml:"listen"`
+	LogLevel             string                    `yaml:"logLevel"`
+	LogDir               string                    `yaml:"logDir"`
+	CookieDomain         string                    `yaml:"cookieDomain"`
+	BaseURL              string                    `yaml:"baseURL"`
+	ClientTokens         []string                  `yaml:"clientTokens"`
+	MySQLConfig          *DatabaseConfig           `yaml:"mysql"`
+	RedisConfig          *RedisConfig              `yaml:"redis"`
+	MinioConfig          *MinioConfig              `yaml:"minio"`
+	Sitemap              *SitemapConfig            `yaml:"sitemap"`
+	OAuthConfigList      []*OAuthConfigBlock       `yaml:"oauth"`
+	EmailTemplatesFolder string                    `yaml:"emailTemplatesFolder"`
+	EmailTemplates       *EmailTemplates           ``
+	SqlDB                *gorm.DB                  ``
+	RedisPool            *redis.Pool               ``
+	MinioClient          *minio.Client             ``
+	RequestLogger        *logrus.Logger            ``
+	TokenAuthenticator   *SimpleTokenAuthenticator ``
+	SessionManager       *scs.SessionManager       ``
+}
+
+func (s *StandardConfig) RedisKeyName(key, value string) string {
+	return fmt.Sprintf(`%s@%s-%s-%s`, s.Name, s.Environ, key, value)
 }
 
 func (s *StandardConfig) StandardInit() error {
@@ -109,10 +168,14 @@ func (s *StandardConfig) StandardInit() error {
 
 		// session manager
 		s.SessionManager = scs.New()
-		s.SessionManager.Lifetime = 24 * time.Hour
+		s.SessionManager.Lifetime = 7 * 24 * time.Hour
+		s.SessionManager.Cookie.HttpOnly = true
 		s.SessionManager.Cookie.SameSite = http.SameSiteLaxMode
 		if s.CookieDomain != "" {
 			s.SessionManager.Cookie.Domain = s.CookieDomain
+		}
+		if s.Environ == "online" {
+			s.SessionManager.Cookie.Secure = true
 		}
 
 		if s.RedisPool != nil {
@@ -124,6 +187,15 @@ func (s *StandardConfig) StandardInit() error {
 			requestLogger, _ := GetRotatingFileLogger(s.LogDir + "/request.log")
 			requestLogger.Formatter = GetCleanJSONFormatter()
 			s.RequestLogger = requestLogger
+		}
+
+		// email
+		if s.EmailTemplatesFolder != "" {
+			if templates, err := NewEmailTemplates(s.EmailTemplatesFolder); err != nil {
+				return err
+			} else {
+				s.EmailTemplates = &templates
+			}
 		}
 	}
 
