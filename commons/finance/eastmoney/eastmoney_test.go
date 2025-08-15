@@ -1,4 +1,4 @@
-package eastmoney
+package eastmoney_test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/CaledoniaProject/gopkg-commons/commons"
+	"github.com/CaledoniaProject/gopkg-commons/commons/finance/eastmoney"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,7 +18,7 @@ func init() {
 }
 
 func TestFundNav(t *testing.T) {
-	if data, err := GetFundHistoryNav(&LsjzRequest{
+	if data, err := eastmoney.GetFundHistoryNav(&eastmoney.LsjzRequest{
 		FundCode:  "000290",
 		PageIndex: 1,
 		PageSize:  1,
@@ -33,12 +34,44 @@ func TestFundNav(t *testing.T) {
 }
 
 func TestStockPrice_CN(t *testing.T) {
-	quoteTable, err := GetQuoteByRawCode("513400", "")
+	quoteTable, err := eastmoney.GetQuoteByRawCode("513400", "")
 	if err != nil {
 		t.Fatalf("get quote: %v", err)
 	}
 
-	prices, err := GetHistoryPrice(quoteTable.QuoteID, time.Now().Add(-3*24*time.Hour), time.Now())
+	prices, err := eastmoney.GetHistoryPrice(quoteTable.QuoteID, time.Now().Add(-3*24*time.Hour), time.Now())
+	if err != nil {
+		t.Fatalf("get price: %v", err)
+	}
+
+	for _, price := range prices {
+		fmt.Println(price)
+	}
+}
+
+func TestStockPrice_HK(t *testing.T) {
+	quoteTable, err := eastmoney.GetQuoteByRawCode("00700", "")
+	if err != nil {
+		t.Fatalf("get quote: %v", err)
+	}
+
+	prices, err := eastmoney.GetHistoryPrice(quoteTable.QuoteID, time.Now().Add(-3*24*time.Hour), time.Now())
+	if err != nil {
+		t.Fatalf("get price: %v", err)
+	}
+
+	for _, price := range prices {
+		fmt.Println(price)
+	}
+}
+
+func TestStockPrice_US(t *testing.T) {
+	quoteTable, err := eastmoney.GetQuoteByRawCode("BIL", "")
+	if err != nil {
+		t.Fatalf("get quote: %v", err)
+	}
+
+	prices, err := eastmoney.GetHistoryPrice(quoteTable.QuoteID, time.Now().Add(-3*24*time.Hour), time.Now())
 	if err != nil {
 		t.Fatalf("get price: %v", err)
 	}

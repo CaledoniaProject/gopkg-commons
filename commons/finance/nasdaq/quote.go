@@ -105,9 +105,11 @@ func GetQuoteChart(symbol, assetClass string, fromDate, toDate time.Time) (quote
 	_, body, err := commons.HttpRequest(&commons.RequestOptions{
 		URL:         quoteURL,
 		MaxBodyRead: 10 * 1024 * 1024,
-		Timeout:     30,
+		Timeout:     10,
+		MaxRetry:    3,
 		Headers: map[string]string{
 			"User-Agent": commons.RandomUserAgent(),
+			"Connection": "close",
 		},
 	})
 	if err != nil {

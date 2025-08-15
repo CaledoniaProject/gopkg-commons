@@ -1,4 +1,4 @@
-package nasdaq
+package nasdaq_test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/CaledoniaProject/gopkg-commons/commons"
+	"github.com/CaledoniaProject/gopkg-commons/commons/finance/nasdaq"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,7 +18,7 @@ func init() {
 }
 
 func TestChart(t *testing.T) {
-	data, err := GetHistoricalChart("AAPL", time.Now().AddDate(-20, 0, -15), time.Now().AddDate(-20, 0, 0))
+	data, err := nasdaq.GetHistoricalChart("AAPL", time.Now().AddDate(-20, 0, -15), time.Now().AddDate(-20, 0, 0))
 	if err != nil {
 		t.Fatalf("request failed: %v", err)
 	}
@@ -28,7 +29,7 @@ func TestChart(t *testing.T) {
 }
 
 func TestQuote(t *testing.T) {
-	data, err := GetQuoteChart("TLT", "etf", time.Now().AddDate(0, 0, -7), time.Now())
+	data, err := nasdaq.GetQuoteChart("TLT", "etf", time.Now().AddDate(0, 0, -7), time.Now())
 	if err != nil {
 		t.Fatalf("request failed: %v", err)
 	}
@@ -39,7 +40,7 @@ func TestQuote(t *testing.T) {
 }
 
 func TestGetStocks(t *testing.T) {
-	data, err := GetStocks(5, 5)
+	data, err := nasdaq.GetStocks(5, 5)
 	if err != nil {
 		t.Fatalf("request failed: %v", err)
 	}

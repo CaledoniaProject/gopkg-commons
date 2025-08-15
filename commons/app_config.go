@@ -199,6 +199,13 @@ func (s *StandardConfig) StandardInit() error {
 		}
 	}
 
+	if s.LogDir != "" {
+		filename := fmt.Sprintf("%s/%s-%s.log", s.LogDir, s.Name, s.Mode)
+
+		logrus.Infof("will log to %s instead", filename)
+		SetupJsonFileLogger(filename)
+	}
+
 	return nil
 }
 

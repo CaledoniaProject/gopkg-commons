@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/CaledoniaProject/gopkg-commons/commons"
+	"github.com/CaledoniaProject/gopkg-commons/commons/finance"
 )
 
 // 不确定的: f85 也是总股本，f117 也是总市值
@@ -80,16 +81,6 @@ type qtStockKLineGetResponse struct {
 	Data *qtStockKLineGetResponseData `json:"data"`
 }
 
-type historyPrice struct {
-	Date        time.Time
-	OpenPrice   float64
-	ClosePrice  float64
-	HighPrice   float64
-	LowPrice    float64
-	TradeVolume float64
-	TradeAmount float64
-}
-
 // f51: 日期
 // f52: 开盘价
 // f53: 收盘价
@@ -98,7 +89,16 @@ type historyPrice struct {
 // f56: 交易量
 // f57: 成交额
 // 日期格式: 20990101
-func GetHistoryPrice(quoteId string, beginDate, endDate time.Time) (result []*historyPrice, err error) {
+func GetHistoryPriceByRawCode(rawCode, classify string, beginDate, endDate time.Time) (result []*finance.HistoricalPrice, err error) {
+	quoteTable, err := GetQuoteByRawCode(rawCode, classify)
+	if err != nil {
+		return nil, err
+	}
+
+	return GetHistoryPrice(quoteTable.QuoteID, time.Now().Add(-3*24*time.Hour), time.Now())
+}
+
+func GetHistoryPrice(quoteId string, beginDate, endDate time.Time) (result []*finance.HistoricalPrice, err error) {
 	var (
 		historyPriceParams = &qtStockKLineGetRequest{
 			Secid:     quoteId,
@@ -143,7 +143,7 @@ func GetHistoryPrice(quoteId string, beginDate, endDate time.Time) (result []*hi
 			return nil, err
 		}
 
-		result = append(result, &historyPrice{
+		result = append(result, &finance.HistoricalPrice{
 			Date:        tradeDay,
 			OpenPrice:   commons.Atof(parts[1]),
 			ClosePrice:  commons.Atof(parts[2]),

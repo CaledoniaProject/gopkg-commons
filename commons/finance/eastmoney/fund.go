@@ -3,6 +3,7 @@ package eastmoney
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/CaledoniaProject/gopkg-commons/commons"
@@ -41,6 +42,9 @@ type FundNav struct {
 	FHSP      string `json:"FHSP"`      // 分红说明
 	SDATE     string `json:"SDATE"`     // 未知
 	DTYPE     string `json:"DTYPE"`     // 未知
+
+	UnitValue float64   // 手动计算的净值
+	UnitDate  time.Time // 解析后的日期
 }
 
 func GetFundHistoryNav(lsjzRequest *LsjzRequest) (results []*FundNav, err error) {
@@ -58,11 +62,21 @@ func GetFundHistoryNav(lsjzRequest *LsjzRequest) (results []*FundNav, err error)
 	}); err != nil {
 		return nil, err
 	} else if err := json.Unmarshal(body, lsjzResponse); err != nil {
-		fmt.Println(string(body))
 		return nil, err
 	} else if lsjzResponse.ErrCode != 0 {
 		return nil, fmt.Errorf("error getting nav for %s: %v (%d)", lsjzRequest.FundCode, lsjzResponse.ErrMsg, lsjzResponse.ErrCode)
 	} else {
+		for _, row := range lsjzResponse.Data.FundNavList {
+			// 忽略错误
+			if tmp, err := strconv.ParseFloat(row.DWJZ, 64); err == nil {
+				row.UnitValue = tmp
+			}
+
+			if tmp, err := time.Parse("2006-01-02", row.FSRQ); err == nil {
+				row.UnitDate = tmp
+			}
+		}
+
 		return lsjzResponse.Data.FundNavList, nil
 	}
 }
